@@ -21,8 +21,7 @@ $product = null;
 $product_id = intval($_GET['id'] ?? 0);
 
 if ($product_id <= 0) {
-    header('Location: /sms/products/list.php');
-    exit();
+    redirect_to('products/list.php');
 }
 
 // Get product data
@@ -38,13 +37,11 @@ try {
     $product = $stmt->fetch();
     
     if (!$product) {
-        header('Location: /sms/products/list.php');
-        exit();
+        redirect_to('products/list.php');
     }
 } catch (Exception $e) {
     error_log("Product fetch error: " . $e->getMessage());
-    header('Location: /sms/products/list.php');
-    exit();
+    redirect_to('products/list.php');
 }
 
 // Handle delete confirmation
@@ -86,8 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Redirect with success message
             $_SESSION['success_message'] = 'Product "' . $product['product_name'] . '" deleted successfully.';
-            header('Location: /sms/products/list.php');
-            exit();
+            redirect_to('products/list.php');
             
         } catch (Exception $e) {
             $db->rollback();
@@ -105,7 +101,7 @@ $page_title = "Delete Product";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?> - Stock Management System</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="<?php echo url('assets/css/style.css'); ?>">
 </head>
 <body>
     <div class="admin-layout">
@@ -115,12 +111,12 @@ $page_title = "Delete Product";
                 <h1>SMS</h1>
             </div>
             <ul class="sidebar-nav">
-                <li><a href="/sms/">📊 Dashboard</a></li>
-                <li><a href="/sms/products/list.php" class="active">📦 Products</a></li>
-                <li><a href="/sms/products/create.php">➕ Add Product</a></li>
-                <li><a href="/sms/qr/scan.php">📱 QR Scanner</a></li>
-                <li><a href="/sms/logs/stock_logs.php">📋 Stock Logs</a></li>
-                <li><a href="/sms/exports/">📤 Export Data</a></li>
+                <li><a href="<?php echo BASE_URL; ?>">📊 Dashboard</a></li>
+                <li><a href="<?php echo url('products/list.php'); ?>" class="active">📦 Products</a></li>
+                <li><a href="<?php echo url('products/create.php'); ?>">➕ Add Product</a></li>
+                <li><a href="<?php echo url('qr/scan.php'); ?>">📱 QR Scanner</a></li>
+                <li><a href="<?php echo url('logs/stock_logs.php'); ?>">📋 Stock Logs</a></li>
+                <li><a href="<?php echo url('exports/'); ?>">📤 Export Data</a></li>
             </ul>
         </nav>
         
@@ -131,7 +127,7 @@ $page_title = "Delete Product";
                 <h1 class="page-title"><?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?></h1>
                 <div class="admin-info">
                     <span>Welcome, <?php echo htmlspecialchars($admin['username'], ENT_QUOTES, 'UTF-8'); ?></span>
-                    <a href="/sms/logout.php" class="btn btn-secondary btn-sm">Logout</a>
+                    <a href="<?php echo url('logout.php'); ?>" class="btn btn-secondary btn-sm">Logout</a>
                 </div>
             </header>
             
@@ -208,8 +204,8 @@ $page_title = "Delete Product";
                             <div class="form-group">
                                 <div class="btn-group">
                                     <button type="submit" class="btn btn-danger">🗑️ Yes, Delete Product</button>
-                                    <a href="/sms/products/list.php" class="btn btn-secondary">Cancel</a>
-                                    <a href="/sms/products/edit.php?id=<?php echo $product_id; ?>" class="btn btn-primary">Edit Instead</a>
+                                    <a href="<?php echo url('products/list.php'); ?>" class="btn btn-secondary">Cancel</a>
+                                    <a href="<?php echo url('products/edit.php?id=' . $product_id); ?>" class="btn btn-primary">Edit Instead</a>
                                 </div>
                             </div>
                         </form>

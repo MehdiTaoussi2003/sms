@@ -5,6 +5,7 @@
  */
 
 define('SMS_INCLUDED', true);
+require_once __DIR__ . '/config/config.php';
 
 session_start();
 
@@ -24,6 +25,5 @@ if (ini_get("session.use_cookies")) {
 session_destroy();
 
 // Redirect to login page with logout message
-header('Location: /sms/login.php?logout=1');
-exit();
+redirect_to('login.php?logout=1');
 ?>

@@ -5,6 +5,7 @@
  */
 
 define('SMS_INCLUDED', true);
+require_once 'config/config.php';
 require_once 'config/database.php';
 require_once 'auth/auth_check.php';
 require_once 'auth/csrf.php';
@@ -73,7 +74,7 @@ $page_title = "Dashboard";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?> - Stock Management System</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="<?php echo url('assets/css/style.css'); ?>">
 </head>
 <body>
     <div class="admin-layout">
@@ -85,12 +86,12 @@ $page_title = "Dashboard";
                 <p>Stock Management</p>
             </div>
             <ul class="sidebar-nav">
-                <li><a href="/sms/" class="active"><span class="nav-icon">📊</span><span class="nav-text">Dashboard</span></a></li>
-                <li><a href="/sms/products/list.php"><span class="nav-icon">📦</span><span class="nav-text">Products</span></a></li>
-                <li><a href="/sms/products/create.php"><span class="nav-icon">➕</span><span class="nav-text">Add Product</span></a></li>
-                <li><a href="/sms/qr/scan.php"><span class="nav-icon">📱</span><span class="nav-text">QR Scanner</span></a></li>
-                <li><a href="/sms/logs/stock_logs.php"><span class="nav-icon">📋</span><span class="nav-text">Stock Logs</span></a></li>
-                <li><a href="/sms/exports/"><span class="nav-icon">📤</span><span class="nav-text">Export Data</span></a></li>
+                <li><a href="<?php echo BASE_URL; ?>" class="active"><span class="nav-icon">📊</span><span class="nav-text">Dashboard</span></a></li>
+                <li><a href="<?php echo url('products/list.php'); ?>"><span class="nav-icon">📦</span><span class="nav-text">Products</span></a></li>
+                <li><a href="<?php echo url('products/create.php'); ?>"><span class="nav-icon">➕</span><span class="nav-text">Add Product</span></a></li>
+                <li><a href="<?php echo url('qr/scan.php'); ?>"><span class="nav-icon">📱</span><span class="nav-text">QR Scanner</span></a></li>
+                <li><a href="<?php echo url('logs/stock_logs.php'); ?>"><span class="nav-icon">📋</span><span class="nav-text">Stock Logs</span></a></li>
+                <li><a href="<?php echo url('exports/'); ?>"><span class="nav-icon">📤</span><span class="nav-text">Export Data</span></a></li>
             </ul>
         </nav>
         
@@ -115,7 +116,7 @@ $page_title = "Dashboard";
                     <div class="admin-avatar">
                         <?php echo strtoupper(substr($admin['username'], 0, 1)); ?>
                     </div>
-                    <a href="/sms/logout.php" class="btn btn-secondary btn-sm">Logout</a>
+                    <a href="<?php echo url('logout.php'); ?>" class="btn btn-secondary btn-sm">Logout</a>
                 </div>
             </header>
             <script>
@@ -218,7 +219,7 @@ $page_title = "Dashboard";
                                         </table>
                                     </div>
                                     <div class="text-center mt-3">
-                                        <a href="/sms/products/list.php?filter=low_stock" class="btn btn-warning btn-sm">View All Low Stock</a>
+                                        <a href="<?php echo url('products/list.php?filter=low_stock'); ?>" class="btn btn-warning btn-sm">View All Low Stock</a>
                                     </div>
                                 <?php endif; ?>
                             </div>
@@ -283,7 +284,7 @@ $page_title = "Dashboard";
                                         </table>
                                     </div>
                                     <div class="text-center mt-3">
-                                        <a href="/sms/logs/stock_logs.php" class="btn btn-primary btn-sm">View All Logs</a>
+                                        <a href="<?php echo url('logs/stock_logs.php'); ?>" class="btn btn-primary btn-sm">View All Logs</a>
                                     </div>
                                 <?php endif; ?>
                             </div>
@@ -298,17 +299,17 @@ $page_title = "Dashboard";
                     </div>
                     <div class="card-body">
                         <div class="btn-group">
-                            <a href="/sms/products/create.php" class="btn btn-primary">Add New Product</a>
-                            <a href="/sms/qr/scan.php" class="btn btn-success">Scan QR Code</a>
-                            <a href="/sms/products/list.php" class="btn btn-secondary">Browse Products</a>
-                            <a href="/sms/exports/" class="btn btn-warning">Export Data</a>
+                            <a href="<?php echo url('products/create.php'); ?>" class="btn btn-primary">Add New Product</a>
+                            <a href="<?php echo url('qr/scan.php'); ?>" class="btn btn-success">Scan QR Code</a>
+                            <a href="<?php echo url('products/list.php'); ?>" class="btn btn-secondary">Browse Products</a>
+                            <a href="<?php echo url('exports/'); ?>" class="btn btn-warning">Export Data</a>
                         </div>
                     </div>
                 </div>
             </main>
         </div>
     </div>
-    <script src="assets/js/mobile-menu-universal.js"></script>
+    <script src="<?php echo url('assets/js/mobile-menu-universal.js'); ?>"></script>
     <script>
         SMS.MobileMenu.init();
     </script>

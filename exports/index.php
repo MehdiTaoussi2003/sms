@@ -197,7 +197,7 @@ function outputHTML($title, $data, $type) {
         
         <div class="no-print">
             <button onclick="window.print()">🖨️ Print Report</button>
-            <a href="/sms/exports/" style="margin-left: 10px;">← Back to Export Center</a>
+            <a href="<?php echo url('exports/'); ?>" style="margin-left: 10px;">← Back to Export Center</a>
         </div>';
     
     if (empty($data)) {
@@ -283,7 +283,7 @@ $page_title = "Export Data";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?> - Stock Management System</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="<?php echo url('assets/css/style.css'); ?>">
 </head>
 <body>
     <div class="admin-layout">
@@ -295,12 +295,12 @@ $page_title = "Export Data";
                 <p>Stock Management</p>
             </div>
             <ul class="sidebar-nav">
-                <li><a href="/sms/"><span class="nav-icon">📊</span><span class="nav-text">Dashboard</span></a></li>
-                <li><a href="/sms/products/list.php"><span class="nav-icon">📦</span><span class="nav-text">Products</span></a></li>
-                <li><a href="/sms/products/create.php"><span class="nav-icon">➕</span><span class="nav-text">Add Product</span></a></li>
-                <li><a href="/sms/qr/scan.php"><span class="nav-icon">📱</span><span class="nav-text">QR Scanner</span></a></li>
-                <li><a href="/sms/logs/stock_logs.php"><span class="nav-icon">📋</span><span class="nav-text">Stock Logs</span></a></li>
-                <li><a href="/sms/exports/" class="active"><span class="nav-icon">📤</span><span class="nav-text">Export Data</span></a></li>
+                <li><a href="<?php echo BASE_URL; ?>"><span class="nav-icon">📊</span><span class="nav-text">Dashboard</span></a></li>
+                <li><a href="<?php echo url('products/list.php'); ?>"><span class="nav-icon">📦</span><span class="nav-text">Products</span></a></li>
+                <li><a href="<?php echo url('products/create.php'); ?>"><span class="nav-icon">➕</span><span class="nav-text">Add Product</span></a></li>
+                <li><a href="<?php echo url('qr/scan.php'); ?>"><span class="nav-icon">📱</span><span class="nav-text">QR Scanner</span></a></li>
+                <li><a href="<?php echo url('logs/stock_logs.php'); ?>"><span class="nav-icon">📋</span><span class="nav-text">Stock Logs</span></a></li>
+                <li><a href="<?php echo url('exports/'); ?>" class="active"><span class="nav-icon">📤</span><span class="nav-text">Export Data</span></a></li>
             </ul>
         </nav>
         
@@ -325,7 +325,7 @@ $page_title = "Export Data";
                     <div class="admin-avatar">
                         <?php echo strtoupper(substr($admin['username'], 0, 1)); ?>
                     </div>
-                    <a href="/sms/logout.php" class="btn btn-secondary btn-sm">Logout</a>
+                    <a href="<?php echo url('logout.php'); ?>" class="btn btn-secondary btn-sm">Logout</a>
                 </div>
             </header>
             

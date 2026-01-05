@@ -105,7 +105,7 @@ $page_title = "QR Code Generator";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?> - Stock Management System</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="<?php echo url('assets/css/style.css'); ?>">
     <style>
         .qr-container {
             text-align: center;
@@ -154,12 +154,12 @@ $page_title = "QR Code Generator";
                 <h1>SMS</h1>
             </div>
             <ul class="sidebar-nav">
-                <li><a href="/sms/">📊 Dashboard</a></li>
-                <li><a href="/sms/products/list.php" class="active">📦 Products</a></li>
-                <li><a href="/sms/products/create.php">➕ Add Product</a></li>
-                <li><a href="/sms/qr/scan.php">📱 QR Scanner</a></li>
-                <li><a href="/sms/logs/stock_logs.php">📋 Stock Logs</a></li>
-                <li><a href="/sms/exports/">📤 Export Data</a></li>
+                <li><a href="<?php echo BASE_URL; ?>">📊 Dashboard</a></li>
+                <li><a href="<?php echo url('products/list.php'); ?>" class="active">📦 Products</a></li>
+                <li><a href="<?php echo url('products/create.php'); ?>">➕ Add Product</a></li>
+                <li><a href="<?php echo url('qr/scan.php'); ?>">📱 QR Scanner</a></li>
+                <li><a href="<?php echo url('logs/stock_logs.php'); ?>">📋 Stock Logs</a></li>
+                <li><a href="<?php echo url('exports/'); ?>">📤 Export Data</a></li>
             </ul>
         </nav>
         
@@ -170,7 +170,7 @@ $page_title = "QR Code Generator";
                 <h1 class="page-title"><?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?></h1>
                 <div class="admin-info">
                     <span>Welcome, <?php echo htmlspecialchars($admin['username'], ENT_QUOTES, 'UTF-8'); ?></span>
-                    <a href="/sms/logout.php" class="btn btn-secondary btn-sm">Logout</a>
+                    <a href="<?php echo url('logout.php'); ?>" class="btn btn-secondary btn-sm">Logout</a>
                 </div>
             </header>
             
@@ -182,15 +182,15 @@ $page_title = "QR Code Generator";
                             <div class="alert alert-error">
                                 <?php echo htmlspecialchars($error_message, ENT_QUOTES, 'UTF-8'); ?>
                             </div>
-                            <a href="/sms/products/list.php" class="btn btn-secondary">Back to Products</a>
+                            <a href="<?php echo url('products/list.php'); ?>" class="btn btn-secondary">Back to Products</a>
                         </div>
                     </div>
                 <?php elseif ($product): ?>
                     <div class="no-print mb-3">
                         <div class="btn-group">
                             <button onclick="window.print()" class="btn btn-primary">🖨️ Print QR Code</button>
-                            <a href="/sms/products/edit.php?id=<?php echo $product_id; ?>" class="btn btn-secondary">Edit Product</a>
-                            <a href="/sms/products/list.php" class="btn btn-secondary">Back to Products</a>
+                            <a href="<?php echo url('products/edit.php?id=' . $product_id); ?>" class="btn btn-secondary">Edit Product</a>
+                            <a href="<?php echo url('products/list.php'); ?>" class="btn btn-secondary">Back to Products</a>
                         </div>
                     </div>
                     

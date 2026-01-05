@@ -4,11 +4,11 @@
  * Stock Management System (SMS)
  */
 
-// Prevent direct access
+// Allow inclusion and load URL helpers
 if (!defined('SMS_INCLUDED')) {
-    http_response_code(403);
-    exit('Direct access forbidden');
+    define('SMS_INCLUDED', true);
 }
+require_once __DIR__ . '/../config/config.php';
 
 class Auth {
     /**
@@ -30,10 +30,9 @@ class Auth {
      */
     public static function requireLogin() {
         if (!self::isLoggedIn()) {
-            // Store current page for redirect after login
-            $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
-            header('Location: /sms/login.php');
-            exit();
+            // Store current absolute URL for redirect after login
+            $_SESSION['redirect_after_login'] = current_url();
+            redirect_to('login.php');
         }
         
         // Regenerate session ID periodically for security

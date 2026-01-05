@@ -1,0 +1,19 @@
+# SMS Basic Apache configuration
+# Prevent content-type sniffing
+Header set X-Content-Type-Options nosniff
+# Disable directory listings
+Options -Indexes
+# Avoid MultiViews interfering with paths
+Options -MultiViews
+# Default index
+DirectoryIndex index.php
+
+# Security: deny access to sensitive files
+<FilesMatch "\.(sql|ini|log|sh|md|lock)$">
+    Require all denied
+</FilesMatch>
+
+# Cache static assets lightly (adjust as needed)
+<FilesMatch "\.(css|js|png|jpg|jpeg|gif|svg)$">
+    Header set Cache-Control "max-age=604800, public"
+</FilesMatch>

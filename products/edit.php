@@ -22,8 +22,7 @@ $product = null;
 $product_id = intval($_GET['id'] ?? 0);
 
 if ($product_id <= 0) {
-    header('Location: /sms/products/list.php');
-    exit();
+    redirect_to('products/list.php');
 }
 
 // Get product data
@@ -39,13 +38,11 @@ try {
     $product = $stmt->fetch();
     
     if (!$product) {
-        header('Location: /sms/products/list.php');
-        exit();
+        redirect_to('products/list.php');
     }
 } catch (Exception $e) {
     error_log("Product fetch error: " . $e->getMessage());
-    header('Location: /sms/products/list.php');
-    exit();
+    redirect_to('products/list.php');
 }
 
 // Handle form submission
@@ -217,7 +214,7 @@ $page_title = "Edit Product";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?> - Stock Management System</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="<?php echo url('assets/css/style.css'); ?>">
 </head>
 <body>
     <div class="admin-layout">
@@ -227,12 +224,12 @@ $page_title = "Edit Product";
                 <h1>SMS</h1>
             </div>
             <ul class="sidebar-nav">
-                <li><a href="/sms/">📊 Dashboard</a></li>
-                <li><a href="/sms/products/list.php" class="active">📦 Products</a></li>
-                <li><a href="/sms/products/create.php">➕ Add Product</a></li>
-                <li><a href="/sms/qr/scan.php">📱 QR Scanner</a></li>
-                <li><a href="/sms/logs/stock_logs.php">📋 Stock Logs</a></li>
-                <li><a href="/sms/exports/">📤 Export Data</a></li>
+                <li><a href="<?php echo BASE_URL; ?>">📊 Dashboard</a></li>
+                <li><a href="<?php echo url('products/list.php'); ?>" class="active">📦 Products</a></li>
+                <li><a href="<?php echo url('products/create.php'); ?>">➕ Add Product</a></li>
+                <li><a href="<?php echo url('qr/scan.php'); ?>">📱 QR Scanner</a></li>
+                <li><a href="<?php echo url('logs/stock_logs.php'); ?>">📋 Stock Logs</a></li>
+                <li><a href="<?php echo url('exports/'); ?>">📤 Export Data</a></li>
             </ul>
         </nav>
         
@@ -243,7 +240,7 @@ $page_title = "Edit Product";
                 <h1 class="page-title"><?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?></h1>
                 <div class="admin-info">
                     <span>Welcome, <?php echo htmlspecialchars($admin['username'], ENT_QUOTES, 'UTF-8'); ?></span>
-                    <a href="/sms/logout.php" class="btn btn-secondary btn-sm">Logout</a>
+                    <a href="<?php echo url('logout.php'); ?>" class="btn btn-secondary btn-sm">Logout</a>
                 </div>
             </header>
             
@@ -254,8 +251,8 @@ $page_title = "Edit Product";
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <h3 class="card-title">Edit Product: <?php echo htmlspecialchars($product['product_name'], ENT_QUOTES, 'UTF-8'); ?></h3>
                             <div class="btn-group">
-                                <a href="/sms/qr/generate.php?id=<?php echo $product_id; ?>" class="btn btn-secondary btn-sm" target="_blank">View QR Code</a>
-                                <a href="/sms/products/list.php" class="btn btn-secondary btn-sm">Back to List</a>
+                                <a href="<?php echo url('qr/generate.php?id=' . $product_id); ?>" class="btn btn-secondary btn-sm" target="_blank">View QR Code</a>
+                                <a href="<?php echo url('products/list.php'); ?>" class="btn btn-secondary btn-sm">Back to List</a>
                             </div>
                         </div>
                     </div>
@@ -462,8 +459,8 @@ $page_title = "Edit Product";
                             
                             <div class="form-group">
                                 <button type="submit" class="btn btn-success">Update Product</button>
-                                <a href="/sms/products/list.php" class="btn btn-secondary">Cancel</a>
-                                <a href="/sms/products/delete.php?id=<?php echo $product_id; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this product?')">Delete Product</a>
+                                <a href="<?php echo url('products/list.php'); ?>" class="btn btn-secondary">Cancel</a>
+                                <a href="<?php echo url('products/delete.php?id=' . $product_id); ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this product?')">Delete Product</a>
                             </div>
                         </form>
                     </div>

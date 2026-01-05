@@ -5,6 +5,7 @@
  */
 
 define('SMS_INCLUDED', true);
+require_once 'config/config.php';
 require_once 'config/database.php';
 require_once 'auth/csrf.php';
 
@@ -12,10 +13,9 @@ session_start();
 
 // Redirect if already logged in
 if (isset($_SESSION['admin_id'])) {
-    $redirect = isset($_SESSION['redirect_after_login']) ? $_SESSION['redirect_after_login'] : '/sms/';
+    $redirect = isset($_SESSION['redirect_after_login']) ? $_SESSION['redirect_after_login'] : BASE_URL;
     unset($_SESSION['redirect_after_login']);
-    header('Location: ' . $redirect);
-    exit();
+    redirect_to($redirect);
 }
 
 $error_message = '';
@@ -63,12 +63,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['login_time'] = time();
                     $_SESSION['last_activity'] = time();
                     
-                    // Redirect to intended page or dashboard
-                    $redirect = isset($_SESSION['redirect_after_login']) ? $_SESSION['redirect_after_login'] : '/sms/';
+                    // Redirect to intended page or dashboard (absolute URL)
+                    $redirect = isset($_SESSION['redirect_after_login']) ? $_SESSION['redirect_after_login'] : BASE_URL;
                     unset($_SESSION['redirect_after_login']);
-                    
-                    header('Location: ' . $redirect);
-                    exit();
+                    redirect_to($redirect);
                 } else {
                     $error_message = 'Invalid username or password.';
                     
