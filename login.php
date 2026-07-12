@@ -87,18 +87,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Stock Management System</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Design System CSS -->
+    <link rel="stylesheet" href="<?php echo url('assets/css/design-system.css'); ?>">
+    <link rel="stylesheet" href="<?php echo url('assets/css/layout.css'); ?>">
+    <link rel="stylesheet" href="<?php echo url('assets/css/components.css'); ?>">
+    <link rel="stylesheet" href="<?php echo url('assets/css/pages.css'); ?>">
 </head>
 <body>
     <div class="login-container">
         <div class="login-card">
             <div class="login-header">
-                <h1>Stock Management System</h1>
+                <h1>SMS</h1>
                 <p>Please sign in to your account</p>
             </div>
             
             <?php if ($error_message): ?>
-                <div class="alert alert-error">
+                <div class="alert alert-danger">
                     <?php echo htmlspecialchars($error_message, ENT_QUOTES, 'UTF-8'); ?>
                 </div>
             <?php endif; ?>
@@ -123,6 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         required 
                         autocomplete="username"
                         maxlength="50"
+                        placeholder="Enter your username"
                     >
                 </div>
                 
@@ -135,29 +140,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         class="form-control" 
                         required 
                         autocomplete="current-password"
+                        placeholder="••••••••"
                     >
                 </div>
                 
-                <button type="submit" class="btn btn-primary w-100">Sign In</button>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: var(--space-3);">Sign In</button>
             </form>
             
             <div class="mt-4 text-center">
                 <small class="text-muted">
-                    Default credentials: admin / admin123<br>
+                    Default credentials: <strong>admin</strong> / <strong>admin123</strong><br>
                     Please change default password after first login.
                 </small>
             </div>
-        </div>
-    </div>
-    
-    <script>
-        // Focus on username field
-        document.getElementById('username').focus();
         
-        // Clear form on page unload for security
-        window.addEventListener('beforeunload', function() {
-            document.getElementById('password').value = '';
-        });
-    </script>
-</body>
-</html>
+            </main>
+<?php require_once 'includes/footer.php'; ?>

@@ -58,7 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $quantity = max(0, intval($_POST['quantity'] ?? 0));
         $min_stock_level = max(0, intval($_POST['min_stock_level'] ?? 10));
         $status = $_POST['status'] ?? '';
-        $location = trim($_POST['location'] ?? '');
         $supplier = trim($_POST['supplier'] ?? '');
         $purchase_date = $_POST['purchase_date'] ?? null;
         $purchase_price = floatval($_POST['purchase_price'] ?? 0);
@@ -104,16 +103,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $db->beginTransaction();
                     
                     try {
-                        // Store old values for logging
                         $old_quantity = $product['quantity'];
                         $old_status = $product['status'];
-                        $old_location = $product['location'];
                         
                         // Update product
                         $stmt = $db->prepare("
                             UPDATE products SET 
                                 product_name = ?, sku = ?, category_id = ?, quantity = ?, min_stock_level = ?,
-                                status = ?, location = ?, supplier = ?, purchase_date = ?, 
+                                status = ?, supplier = ?, purchase_date = ?, 
                                 purchase_price = ?, selling_price = ?, notes = ?
                             WHERE id = ?
                         ");
@@ -125,7 +122,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $quantity,
                             $min_stock_level,
                             $status,
-                            $location ?: null,
                             $supplier ?: null,
                             $purchase_date ?: null,
                             $purchase_price > 0 ? $purchase_price : null,
@@ -142,17 +138,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if ($old_status != $status) {
                             $changes[] = "Status: $old_status → $status";
                         }
-                        if ($old_location != $location) {
-                            $changes[] = "Location: '$old_location' → '$location'";
-                        }
                         
                         if (!empty($changes)) {
                             $log_stmt = $db->prepare("
                                 INSERT INTO stock_logs (
                                     product_id, admin_id, action_type, old_quantity, new_quantity, 
-                                    old_status, new_status, old_location, new_location, notes, 
+                                    old_status, new_status, notes, 
                                     ip_address, user_agent
-                                ) VALUES (?, ?, 'update', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                ) VALUES (?, ?, 'update', ?, ?, ?, ?, ?, ?, ?)
                             ");
                             
                             $log_stmt->execute([
@@ -162,8 +155,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $quantity,
                                 $old_status,
                                 $status,
-                                $old_location,
-                                $location,
                                 'Product updated: ' . implode(', ', $changes),
                                 $_SERVER['REMOTE_ADDR'] ?? 'unknown',
                                 $_SERVER['HTTP_USER_AGENT'] ?? 'unknown'
@@ -208,47 +199,15 @@ try {
 
 $page_title = "Edit Product";
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?> - Stock Management System</title>
-    <link rel="stylesheet" href="<?php echo url('assets/css/style.css'); ?>">
-</head>
-<body>
-    <div class="admin-layout">
-        <!-- Sidebar -->
-        <nav class="sidebar">
-            <div class="sidebar-logo">
-                <h1>SMS</h1>
-            </div>
-            <ul class="sidebar-nav">
-                <li><a href="<?php echo BASE_URL; ?>">📊 Dashboard</a></li>
-                <li><a href="<?php echo url('products/list.php'); ?>" class="active">📦 Products</a></li>
-                <li><a href="<?php echo url('products/create.php'); ?>">➕ Add Product</a></li>
-                <li><a href="<?php echo url('qr/scan.php'); ?>">📱 QR Scanner</a></li>
-                <li><a href="<?php echo url('logs/stock_logs.php'); ?>">📋 Stock Logs</a></li>
-                <li><a href="<?php echo url('exports/'); ?>">📤 Export Data</a></li>
-            </ul>
-        </nav>
-        
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Top Bar -->
-            <header class="top-bar">
-                <h1 class="page-title"><?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?></h1>
-                <div class="admin-info">
-                    <span>Welcome, <?php echo htmlspecialchars($admin['username'], ENT_QUOTES, 'UTF-8'); ?></span>
-                    <a href="<?php echo url('logout.php'); ?>" class="btn btn-secondary btn-sm">Logout</a>
-                </div>
-            </header>
-            
+<?php require_once '../includes/header.php'; ?>
+<?php require_once '../includes/sidebar.php'; ?>
+<?php require_once '../includes/topbar.php'; ?>
+
             <!-- Content -->
             <main class="content">
+
                 <div class="card">
-                    <div class="card-header">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="card-header justify-between">
                             <h3 class="card-title">Edit Product: <?php echo htmlspecialchars($product['product_name'], ENT_QUOTES, 'UTF-8'); ?></h3>
                             <div class="btn-group">
                                 <a href="<?php echo url('qr/generate.php?id=' . $product_id); ?>" class="btn btn-secondary btn-sm" target="_blank">View QR Code</a>
@@ -258,7 +217,7 @@ $page_title = "Edit Product";
                     </div>
                     <div class="card-body">
                         <?php if (!empty($error_messages)): ?>
-                            <div class="alert alert-error">
+                            <div class="alert alert-danger">
                                 <ul style="margin: 0; padding-left: 20px;">
                                     <?php foreach ($error_messages as $error): ?>
                                         <li><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></li>
@@ -310,7 +269,7 @@ $page_title = "Edit Product";
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="category_id" class="form-label">Category *</label>
-                                    <select id="category_id" name="category_id" class="form-control" required>
+                                    <select id="category_id" name="category_id" class="form-select" required>
                                         <option value="">Select Category</option>
                                         <?php foreach ($categories as $category): ?>
                                         <option value="<?php echo $category['id']; ?>" <?php echo (($_POST['category_id'] ?? $product['category_id']) == $category['id']) ? 'selected' : ''; ?>>
@@ -351,7 +310,7 @@ $page_title = "Edit Product";
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="status" class="form-label">Status *</label>
-                                    <select id="status" name="status" class="form-control" required>
+                                    <select id="status" name="status" class="form-select" required>
                                         <?php 
                                         $current_status = $_POST['status'] ?? $product['status'];
                                         $status_options = [
@@ -454,47 +413,18 @@ $page_title = "Edit Product";
                                 <strong>Product Information:</strong><br>
                                 Created: <?php echo date('M j, Y H:i', strtotime($product['created_at'])); ?><br>
                                 Last Updated: <?php echo date('M j, Y H:i', strtotime($product['last_updated'])); ?><br>
-                                QR Code: <code><?php echo htmlspecialchars($product['qr_code_value'], ENT_QUOTES, 'UTF-8'); ?></code>
+                                QR Code: <code><?php echo htmlspecialchars($product['qr_code_value'], ENT_QUOTES, 'UTF-8'); ?></code><br>
+                                <a href="<?php echo url('locations/index.php'); ?>" class="btn btn-secondary btn-sm mt-2">Manage Stock Locations</a>
                             </div>
                             
                             <div class="form-group">
-                                <button type="submit" class="btn btn-success">Update Product</button>
+                                <button type="submit" class="btn btn-primary">Update Product</button>
                                 <a href="<?php echo url('products/list.php'); ?>" class="btn btn-secondary">Cancel</a>
                                 <a href="<?php echo url('products/delete.php?id=' . $product_id); ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this product?')">Delete Product</a>
                             </div>
                         </form>
                     </div>
                 </div>
+            
             </main>
-        </div>
-    </div>
-    
-    <script>
-        // Focus on product name field
-        document.getElementById('product_name').focus();
-        
-        // Auto-update status based on quantity and min stock level
-        function updateStatusBasedOnQuantity() {
-            const quantity = parseInt(document.getElementById('quantity').value) || 0;
-            const minStock = parseInt(document.getElementById('min_stock_level').value) || 0;
-            const statusSelect = document.getElementById('status');
-            
-            // Don't auto-update if manually set to damaged
-            if (statusSelect.value === 'damaged') {
-                return;
-            }
-            
-            if (quantity === 0) {
-                statusSelect.value = 'out_of_stock';
-            } else if (quantity <= minStock) {
-                statusSelect.value = 'low_stock';
-            } else {
-                statusSelect.value = 'in_stock';
-            }
-        }
-        
-        document.getElementById('quantity').addEventListener('input', updateStatusBasedOnQuantity);
-        document.getElementById('min_stock_level').addEventListener('input', updateStatusBasedOnQuantity);
-    </script>
-</body>
-</html>
+<?php require_once '../includes/footer.php'; ?>

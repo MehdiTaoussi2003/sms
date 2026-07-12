@@ -166,297 +166,348 @@ function outputCSV($filename, $headers, $data, $fields) {
 
 function outputHTML($title, $data, $type) {
     header('Content-Type: text/html; charset=utf-8');
-    
-    echo '<!DOCTYPE html>
-    <html lang="en">
+    ?>
+    <!DOCTYPE html>
+    <html lang="fr">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . ' - Stock Management System</title>
+        <title><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?> - SMS</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
         <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .header h1 { color: #2c3e50; margin-bottom: 5px; }
-            .header p { color: #6c757d; margin: 0; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f8f9fa; font-weight: bold; }
-            .status-in { color: #27ae60; }
-            .status-low { color: #f39c12; }
-            .status-out { color: #e74c3c; }
-            .status-damaged { color: #95a5a6; }
-            @media print { .no-print { display: none; } }
+            :root {
+                --bg-main: #0B0F19;
+                --bg-card: #151B26;
+                --border-color: #222B38;
+                --text-main: #F3F4F6;
+                --text-muted: #9CA3AF;
+                --primary: #6366F1;
+                --primary-hover: #4F46E5;
+                --success: #10B981;
+                --danger: #EF4444;
+                --warning: #F59E0B;
+            }
+            body {
+                font-family: 'Inter', sans-serif;
+                background-color: var(--bg-main);
+                color: var(--text-main);
+                margin: 0;
+                padding: 2rem;
+            }
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+            .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 1px solid var(--border-color);
+                padding-bottom: 1rem;
+                margin-bottom: 2rem;
+            }
+            h1 {
+                margin: 0;
+                font-size: 1.8rem;
+                font-weight: 600;
+            }
+            .btn-print {
+                background-color: var(--primary);
+                color: white;
+                border: none;
+                padding: 0.5rem 1rem;
+                border-radius: 0.375rem;
+                cursor: pointer;
+                font-weight: 500;
+                font-size: 0.875rem;
+                transition: background-color 0.2s;
+                text-decoration: none;
+            }
+            .btn-print:hover {
+                background-color: var(--primary-hover);
+            }
+            .btn-back {
+                background-color: transparent;
+                color: var(--text-muted);
+                border: 1px solid var(--border-color);
+                padding: 0.5rem 1rem;
+                border-radius: 0.375rem;
+                cursor: pointer;
+                font-weight: 500;
+                font-size: 0.875rem;
+                transition: all 0.2s;
+                text-decoration: none;
+                margin-right: 10px;
+            }
+            .btn-back:hover {
+                color: var(--text-main);
+                border-color: var(--text-muted);
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 1rem;
+                background-color: var(--bg-card);
+                border-radius: 0.5rem;
+                overflow: hidden;
+            }
+            th, td {
+                padding: 0.75rem 1rem;
+                text-align: left;
+                border-bottom: 1px solid var(--border-color);
+            }
+            th {
+                background-color: rgba(99, 102, 241, 0.1);
+                font-weight: 600;
+                font-size: 0.875rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+            tr:last-child td {
+                border-bottom: none;
+            }
+            .badge {
+                display: inline-block;
+                padding: 0.25rem 0.5rem;
+                border-radius: 9999px;
+                font-size: 0.75rem;
+                font-weight: 500;
+                text-transform: uppercase;
+            }
+            .badge-in_stock { background-color: rgba(16, 185, 129, 0.2); color: #34D399; }
+            .badge-low_stock { background-color: rgba(245, 158, 11, 0.2); color: #FBBF24; }
+            .badge-out_of_stock { background-color: rgba(239, 68, 68, 0.2); color: #FCA5A5; }
+            .badge-damaged { background-color: rgba(239, 68, 68, 0.2); color: #FCA5A5; }
+            
+            @media print {
+                body {
+                    background-color: white;
+                    color: black;
+                    padding: 0;
+                }
+                .btn-print, .btn-back {
+                    display: none;
+                }
+                table {
+                    background-color: transparent;
+                }
+                th {
+                    background-color: #f3f4f6 !important;
+                    color: black !important;
+                }
+                th, td {
+                    border-bottom: 1px solid #e5e7eb;
+                }
+            }
         </style>
     </head>
     <body>
-        <div class="header">
-            <h1>' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</h1>
-            <p>Generated on: ' . date('M j, Y H:i:s') . '</p>
-            <p>Stock Management System</p>
+        <div class="container">
+            <div class="header">
+                <h1><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></h1>
+                <div>
+                    <a href="index.php" class="btn-back">← Retour</a>
+                    <button onclick="window.print()" class="btn-print">🖨️ Imprimer le rapport</button>
+                </div>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <?php if ($type === 'products' || $type === 'low_stock'): ?>
+                            <th>ID</th>
+                            <th>Nom du produit</th>
+                            <th>SKU</th>
+                            <th>Catégorie</th>
+                            <th>Qté</th>
+                            <th>Seuil Min</th>
+                            <th>Statut</th>
+                            <th>Emplacement</th>
+                            <th>Fournisseur</th>
+                        <?php else: ?>
+                            <th>Date</th>
+                            <th>Produit</th>
+                            <th>SKU</th>
+                            <th>Action</th>
+                            <th>Ancienne Qté</th>
+                            <th>Nouvelle Qté</th>
+                            <th>Admin</th>
+                        <?php endif; ?>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($data)): ?>
+                        <tr>
+                            <td colspan="<?php echo ($type === 'products' || $type === 'low_stock') ? 9 : 7; ?>" style="text-align: center;">Aucune donnée disponible</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($data as $row): ?>
+                            <tr>
+                                <?php if ($type === 'products' || $type === 'low_stock'): ?>
+                                    <td><?php echo htmlspecialchars($row['id'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars($row['product_name'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars($row['sku'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars($row['category'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars($row['quantity'] ?? 0, ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars($row['min_stock_level'] ?? 0, ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td>
+                                        <span class="badge badge-<?php echo htmlspecialchars($row['status'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                                            <?php echo htmlspecialchars(str_replace('_', ' ', $row['status'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+                                        </span>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($row['location'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars($row['supplier'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                <?php else: ?>
+                                    <td><?php echo htmlspecialchars($row['created_at'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars($row['product_name'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars($row['sku'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars(str_replace('_', ' ', $row['action_type'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars($row['old_quantity'] ?? 0, ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars($row['new_quantity'] ?? 0, ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars($row['admin'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                <?php endif; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
-        
-        <div class="no-print">
-            <button onclick="window.print()">🖨️ Print Report</button>
-            <a href="<?php echo url('exports/'); ?>" style="margin-left: 10px;">← Back to Export Center</a>
-        </div>';
-    
-    if (empty($data)) {
-        echo '<p style="text-align: center; color: #6c757d; margin-top: 50px;">No data to display.</p>';
-    } else {
-        echo '<table>';
-        
-        if ($type === 'products' || $type === 'low_stock') {
-            echo '<thead>
-                <tr>
-                    <th>Product Name</th>
-                    <th>SKU</th>
-                    <th>Category</th>
-                    <th>Quantity</th>
-                    <th>Status</th>
-                    <th>Location</th>
-                    <th>Last Updated</th>
-                </tr>
-            </thead>
-            <tbody>';
-            
-            foreach ($data as $row) {
-                $status_class = 'status-' . str_replace('_', '', $row['status']);
-                echo '<tr>
-                    <td>' . htmlspecialchars($row['product_name'], ENT_QUOTES, 'UTF-8') . '</td>
-                    <td>' . htmlspecialchars($row['sku'], ENT_QUOTES, 'UTF-8') . '</td>
-                    <td>' . htmlspecialchars($row['category'], ENT_QUOTES, 'UTF-8') . '</td>
-                    <td>' . number_format($row['quantity']) . '</td>
-                    <td class="' . $status_class . '">' . ucfirst(str_replace('_', ' ', $row['status'])) . '</td>
-                    <td>' . htmlspecialchars($row['location'] ?: '-', ENT_QUOTES, 'UTF-8') . '</td>
-                    <td>' . date('M j, Y H:i', strtotime($row['last_updated'])) . '</td>
-                </tr>';
-            }
-        } elseif ($type === 'logs') {
-            echo '<thead>
-                <tr>
-                    <th>Date/Time</th>
-                    <th>Product</th>
-                    <th>Action</th>
-                    <th>Changes</th>
-                    <th>Admin</th>
-                    <th>Notes</th>
-                </tr>
-            </thead>
-            <tbody>';
-            
-            foreach ($data as $row) {
-                $changes = [];
-                if ($row['old_quantity'] !== null && $row['new_quantity'] !== null && $row['old_quantity'] != $row['new_quantity']) {
-                    $changes[] = 'Qty: ' . $row['old_quantity'] . ' → ' . $row['new_quantity'];
-                }
-                if ($row['old_status'] && $row['new_status'] && $row['old_status'] != $row['new_status']) {
-                    $changes[] = 'Status: ' . $row['old_status'] . ' → ' . $row['new_status'];
-                }
-                
-                echo '<tr>
-                    <td>' . date('M j, Y H:i:s', strtotime($row['created_at'])) . '</td>
-                    <td>' . htmlspecialchars($row['product_name'], ENT_QUOTES, 'UTF-8') . '<br><small>' . htmlspecialchars($row['sku'], ENT_QUOTES, 'UTF-8') . '</small></td>
-                    <td>' . ucfirst(str_replace('_', ' ', $row['action_type'])) . '</td>
-                    <td>' . (empty($changes) ? '-' : implode('<br>', $changes)) . '</td>
-                    <td>' . htmlspecialchars($row['admin'], ENT_QUOTES, 'UTF-8') . '</td>
-                    <td>' . htmlspecialchars($row['notes'] ?: '-', ENT_QUOTES, 'UTF-8') . '</td>
-                </tr>';
-            }
-        }
-        
-        echo '</tbody></table>';
-    }
-    
-    echo '<div style="margin-top: 30px; text-align: center; color: #6c757d; font-size: 12px;">
-        <p>Stock Management System - ' . date('Y') . '</p>
-    </div>
     </body>
-    </html>';
+    </html>
+    <?php
     exit();
 }
 
 $page_title = "Export Data";
+require_once '../includes/header.php';
+require_once '../includes/sidebar.php';
+require_once '../includes/topbar.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?> - Stock Management System</title>
-    <link rel="stylesheet" href="<?php echo url('assets/css/style.css'); ?>">
-</head>
-<body>
-    <div class="admin-layout">
-        <!-- Modern Responsive Sidebar -->
-        <div class="sidebar-overlay" id="sidebar-overlay"></div>
-        <nav class="sidebar" id="sidebar">
-            <div class="sidebar-logo">
-                <h1>SMS</h1>
-                <p>Stock Management</p>
-            </div>
-            <ul class="sidebar-nav">
-                <li><a href="<?php echo BASE_URL; ?>"><span class="nav-icon">📊</span><span class="nav-text">Dashboard</span></a></li>
-                <li><a href="<?php echo url('products/list.php'); ?>"><span class="nav-icon">📦</span><span class="nav-text">Products</span></a></li>
-                <li><a href="<?php echo url('products/create.php'); ?>"><span class="nav-icon">➕</span><span class="nav-text">Add Product</span></a></li>
-                <li><a href="<?php echo url('qr/scan.php'); ?>"><span class="nav-icon">📱</span><span class="nav-text">QR Scanner</span></a></li>
-                <li><a href="<?php echo url('logs/stock_logs.php'); ?>"><span class="nav-icon">📋</span><span class="nav-text">Stock Logs</span></a></li>
-                <li><a href="<?php echo url('exports/'); ?>" class="active"><span class="nav-icon">📤</span><span class="nav-text">Export Data</span></a></li>
-            </ul>
-        </nav>
-        
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Modern Responsive Top Bar -->
-            <header class="top-bar">
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <button class="mobile-menu-toggle" id="mobile-menu-toggle">
-                        <span>☰</span>
-                    </button>
-                    <h1 class="page-title">
-                        <span class="title-icon">📤</span>
-                        <?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?>
-                    </h1>
+
+<!-- Content -->
+<main class="content">
+    <?php if (isset($error_message)): ?>
+        <div class="alert alert-danger">
+            <?php echo htmlspecialchars($error_message, ENT_QUOTES, 'UTF-8'); ?>
+        </div>
+    <?php endif; ?>
+    
+    <div class="row">
+        <!-- Products Export -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📦 Products Export</h3>
                 </div>
-                <div class="admin-info">
-                    <div class="admin-welcome">
-                        <div class="admin-name">Welcome, <?php echo htmlspecialchars($admin['username'], ENT_QUOTES, 'UTF-8'); ?></div>
-                        <div class="admin-role"><?php echo htmlspecialchars($admin['role'], ENT_QUOTES, 'UTF-8'); ?></div>
-                    </div>
-                    <div class="admin-avatar">
-                        <?php echo strtoupper(substr($admin['username'], 0, 1)); ?>
-                    </div>
-                    <a href="<?php echo url('logout.php'); ?>" class="btn btn-secondary btn-sm">Logout</a>
-                </div>
-            </header>
-            
-            <!-- Content -->
-            <main class="content">
-                <?php if (isset($error_message)): ?>
-                    <div class="alert alert-error">
-                        <?php echo htmlspecialchars($error_message, ENT_QUOTES, 'UTF-8'); ?>
-                    </div>
-                <?php endif; ?>
-                
-                <div class="row">
-                    <!-- Products Export -->
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">📦 Products Export</h3>
-                            </div>
-                            <div class="card-body">
-                                <p>Export complete product database including stock levels, categories, and details.</p>
-                                
-                                <form method="POST" action="">
-                                    <?php echo CSRF::getTokenField(); ?>
-                                    <input type="hidden" name="export_type" value="products">
-                                    
-                                    <div class="form-group">
-                                        <label class="form-label">Export Format:</label>
-                                        <div>
-                                            <label><input type="radio" name="format" value="csv" checked> CSV File</label><br>
-                                            <label><input type="radio" name="format" value="html"> HTML Report</label>
-                                        </div>
-                                    </div>
-                                    
-                                    <button type="submit" class="btn btn-primary">📤 Export Products</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                <div class="card-body">
+                    <p>Export complete product database including stock levels, categories, and details.</p>
                     
-                    <!-- Stock Logs Export -->
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">📋 Stock Logs Export</h3>
-                            </div>
-                            <div class="card-body">
-                                <p>Export complete stock activity history including all changes and admin actions.</p>
-                                
-                                <form method="POST" action="">
-                                    <?php echo CSRF::getTokenField(); ?>
-                                    <input type="hidden" name="export_type" value="logs">
-                                    
-                                    <div class="form-group">
-                                        <label class="form-label">Export Format:</label>
-                                        <div>
-                                            <label><input type="radio" name="format" value="csv" checked> CSV File</label><br>
-                                            <label><input type="radio" name="format" value="html"> HTML Report</label>
-                                        </div>
-                                    </div>
-                                    
-                                    <button type="submit" class="btn btn-warning">📤 Export Logs</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Low Stock Alert Export -->
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">⚠️ Low Stock Alert</h3>
-                            </div>
-                            <div class="card-body">
-                                <p>Export products with low stock or out of stock status for immediate attention.</p>
-                                
-                                <form method="POST" action="">
-                                    <?php echo CSRF::getTokenField(); ?>
-                                    <input type="hidden" name="export_type" value="low_stock">
-                                    
-                                    <div class="form-group">
-                                        <label class="form-label">Export Format:</label>
-                                        <div>
-                                            <label><input type="radio" name="format" value="csv" checked> CSV File</label><br>
-                                            <label><input type="radio" name="format" value="html"> HTML Report</label>
-                                        </div>
-                                    </div>
-                                    
-                                    <button type="submit" class="btn btn-danger">📤 Export Low Stock</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Export Instructions -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">📋 Export Instructions</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h5>CSV Format</h5>
-                                <ul>
-                                    <li>Comma-separated values file</li>
-                                    <li>Can be opened in Excel, Google Sheets</li>
-                                    <li>Best for data analysis and processing</li>
-                                    <li>UTF-8 encoded for international characters</li>
-                                </ul>
-                            </div>
-                            <div class="col-md-6">
-                                <h5>HTML Report</h5>
-                                <ul>
-                                    <li>Formatted web page report</li>
-                                    <li>Ready for printing or sharing</li>
-                                    <li>Includes company branding</li>
-                                    <li>Print-friendly layout</li>
-                                </ul>
+                    <form method="POST" action="">
+                        <?php echo CSRF::getTokenField(); ?>
+                        <input type="hidden" name="export_type" value="products">
+                        
+                        <div class="form-group">
+                            <label class="form-label">Export Format:</label>
+                            <div>
+                                <label><input type="radio" name="format" value="csv" checked> CSV File</label><br>
+                                <label><input type="radio" name="format" value="html"> HTML Report</label>
                             </div>
                         </div>
                         
-                        <div class="alert alert-info mt-3">
-                            <strong>Note:</strong> All exports include current data at the time of generation. 
-                            Large databases may take a few moments to process.
-                        </div>
-                    </div>
+                        <button type="submit" class="btn btn-primary">📤 Export Products</button>
+                    </form>
                 </div>
-            </main>
+            </div>
+        </div>
+        
+        <!-- Stock Logs Export -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📋 Stock Logs Export</h3>
+                </div>
+                <div class="card-body">
+                    <p>Export complete stock activity history including all changes and admin actions.</p>
+                    
+                    <form method="POST" action="">
+                        <?php echo CSRF::getTokenField(); ?>
+                        <input type="hidden" name="export_type" value="logs">
+                        
+                        <div class="form-group">
+                            <label class="form-label">Export Format:</label>
+                            <div>
+                                <label><input type="radio" name="format" value="csv" checked> CSV File</label><br>
+                                <label><input type="radio" name="format" value="html"> HTML Report</label>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-secondary">📤 Export Logs</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Low Stock Alert Export -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">⚠️ Low Stock Alert</h3>
+                </div>
+                <div class="card-body">
+                    <p>Export products with low stock or out of stock status for immediate attention.</p>
+                    
+                    <form method="POST" action="">
+                        <?php echo CSRF::getTokenField(); ?>
+                        <input type="hidden" name="export_type" value="low_stock">
+                        
+                        <div class="form-group">
+                            <label class="form-label">Export Format:</label>
+                            <div>
+                                <label><input type="radio" name="format" value="csv" checked> CSV File</label><br>
+                                <label><input type="radio" name="format" value="html"> HTML Report</label>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-danger">📤 Export Low Stock</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
     
-    <script src="../assets/js/mobile-menu-universal.js"></script>
-</body>
-</html>
+    <!-- Export Instructions -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">📋 Export Instructions</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>CSV Format</h5>
+                    <ul>
+                        <li>Comma-separated values file</li>
+                        <li>Can be opened in Excel, Google Sheets</li>
+                        <li>Best for data analysis and processing</li>
+                        <li>UTF-8 encoded for international characters</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h5>HTML Report</h5>
+                    <ul>
+                        <li>Formatted web page report</li>
+                        <li>Ready for printing or sharing</li>
+                        <li>Includes company branding</li>
+                        <li>Print-friendly layout</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="alert alert-info mt-3">
+                <strong>Note:</strong> All exports include current data at the time of generation. 
+                Large databases may take a few moments to process.
+            </div>
+        </div>
+    </div>
+</main>
+
+<?php require_once '../includes/footer.php'; ?>

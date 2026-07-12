@@ -1,0 +1,173 @@
+/* 
+ * SMS Design System - Page Specific Overrides
+ * Dashboard Analytics, Auth/Login layout, QR Scanner
+ */
+
+/* ========================================================================
+   AUTH / LOGIN PAGE
+   ======================================================================== */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-bg-base);
+    background-image: radial-gradient(var(--color-border-default) 1px, transparent 1px);
+    background-size: 20px 20px;
+    padding: var(--space-4);
+}
+
+.login-card {
+    background-color: var(--color-bg-surface);
+    width: 100%;
+    max-width: 440px;
+    padding: var(--space-10) var(--space-8);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--color-border-subtle);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: var(--space-8);
+}
+
+.login-header h1 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-2);
+    letter-spacing: -0.02em;
+}
+
+.login-header p {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+}
+
+/* ========================================================================
+   DASHBOARD KPS
+   ======================================================================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--space-6);
+    margin-bottom: var(--space-8);
+}
+
+.stat-card {
+    background-color: var(--color-bg-surface);
+    padding: var(--space-6);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border-default);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-2);
+}
+
+.stat-number {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: -0.03em;
+    line-height: 1;
+}
+
+.stat-number.total { color: var(--color-primary); }
+.stat-number.low { color: var(--color-warning); }
+.stat-number.out { color: var(--color-danger); }
+.stat-number.recent { color: var(--color-success); }
+
+
+/* ========================================================================
+   QR SCANNER
+   ======================================================================== */
+.scanner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.video-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: var(--space-6) 0;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    background: #000;
+    box-shadow: var(--shadow-lg);
+    aspect-ratio: 1;
+}
+
+#scanner-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.qr-scanner-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.qr-scanner-frame {
+    width: 60%;
+    height: 60%;
+    position: relative;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.4);
+    border-radius: var(--radius-lg);
+}
+
+.corner-tl, .corner-tr, .corner-bl, .corner-br {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--color-primary);
+}
+.corner-tl { top: 0; left: 0; border-right: none; border-bottom: none; border-top-left-radius: var(--radius-lg); }
+.corner-tr { top: 0; right: 0; border-left: none; border-bottom: none; border-top-right-radius: var(--radius-lg); }
+.corner-bl { bottom: 0; left: 0; border-right: none; border-top: none; border-bottom-left-radius: var(--radius-lg); }
+.corner-br { bottom: 0; right: 0; border-left: none; border-top: none; border-bottom-right-radius: var(--radius-lg); }
+
+.scanner-controls {
+    display: flex;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+/* ========================================================================
+   MODALS 
+   ======================================================================== */
+   /* Standardize generic util margins */
+.mt-1 { margin-top: var(--space-2); }
+.mt-2 { margin-top: var(--space-4); }
+.mt-3 { margin-top: var(--space-6); }
+.mt-4 { margin-top: var(--space-8); }
+.mb-1 { margin-bottom: var(--space-2); }
+.mb-2 { margin-bottom: var(--space-4); }
+.mb-3 { margin-bottom: var(--space-6); }
+.mb-4 { margin-bottom: var(--space-8); }
+.text-center { text-align: center; }
+
+.stat-icon { opacity: 0.2; transform: translateY(-2px); transition: opacity var(--transition-normal); }
+.stat-card:hover .stat-icon { opacity: 0.8; }

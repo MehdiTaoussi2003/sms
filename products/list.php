@@ -48,8 +48,10 @@ try {
     }
     
     if (!empty($location_filter)) {
-        $where_conditions[] = "p.location LIKE ?";
-        $params[] = "%$location_filter%";
+        $where_conditions[] = "p.id IN (SELECT product_id FROM product_locations pl JOIN locations l ON pl.location_id = l.id WHERE l.name LIKE ? OR l.location_code LIKE ?)";
+        $loc_param = "%$location_filter%";
+        $params[] = $loc_param;
+        $params[] = $loc_param;
     }
     
     $where_clause = !empty($where_conditions) ? "WHERE " . implode(" AND ", $where_conditions) : "";
@@ -70,8 +72,11 @@ try {
     $sql = "
         SELECT 
             p.id, p.product_name, p.sku, c.name as category_name, p.category_id,
-            p.quantity, p.min_stock_level, p.status, p.location, p.supplier,
-            p.purchase_date, p.last_updated, p.qr_code_value
+            p.quantity, p.min_stock_level, p.status, p.supplier,
+            p.purchase_date, p.last_updated, p.qr_code_value,
+            (SELECT GROUP_CONCAT(l.name SEPARATOR ', ') 
+             FROM product_locations pl JOIN locations l ON pl.location_id=l.id 
+             WHERE pl.product_id=p.id) as loc_names
         FROM products p 
         JOIN categories c ON p.category_id = c.id 
         $where_clause
@@ -91,7 +96,7 @@ try {
     $categories = $categories_stmt->fetchAll();
     
     // Get unique locations for filter
-    $locations_stmt = $db->query("SELECT DISTINCT location FROM products WHERE location IS NOT NULL AND location != '' ORDER BY location");
+    $locations_stmt = $db->query("SELECT id, name FROM locations WHERE status = 'active' ORDER BY name");
     $locations = $locations_stmt->fetchAll();
     
 } catch (Exception $e) {
@@ -105,63 +110,15 @@ try {
 
 $page_title = "Products";
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?> - Stock Management System</title>
-    <link rel="stylesheet" href="<?php echo url('assets/css/style.css'); ?>">
-</head>
-<body>
-    <div class="admin-layout">
-        <!-- Modern Responsive Sidebar -->
-        <div class="sidebar-overlay" id="sidebar-overlay"></div>
-        <nav class="sidebar" id="sidebar">
-            <div class="sidebar-logo">
-                <h1>SMS</h1>
-                <p>Stock Management</p>
-            </div>
-            <ul class="sidebar-nav">
-                <li><a href="<?php echo BASE_URL; ?>"><span class="nav-icon">📊</span><span class="nav-text">Dashboard</span></a></li>
-                <li><a href="<?php echo url('products/list.php'); ?>" class="active"><span class="nav-icon">📦</span><span class="nav-text">Products</span></a></li>
-                <li><a href="<?php echo url('products/create.php'); ?>"><span class="nav-icon">➕</span><span class="nav-text">Add Product</span></a></li>
-                <li><a href="<?php echo url('qr/scan.php'); ?>"><span class="nav-icon">📱</span><span class="nav-text">QR Scanner</span></a></li>
-                <li><a href="<?php echo url('logs/stock_logs.php'); ?>"><span class="nav-icon">📋</span><span class="nav-text">Stock Logs</span></a></li>
-                <li><a href="<?php echo url('exports/'); ?>"><span class="nav-icon">📤</span><span class="nav-text">Export Data</span></a></li>
-            </ul>
-        </nav>
-        
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Modern Responsive Top Bar -->
-            <header class="top-bar">
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <button class="mobile-menu-toggle" id="mobile-menu-toggle">
-                        <span>☰</span>
-                    </button>
-                    <h1 class="page-title">
-                        <span class="title-icon">📦</span>
-                        <?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?>
-                    </h1>
-                </div>
-                <div class="admin-info">
-                    <div class="admin-welcome">
-                        <div class="admin-name">Welcome, <?php echo htmlspecialchars($admin['username'], ENT_QUOTES, 'UTF-8'); ?></div>
-                        <div class="admin-role"><?php echo htmlspecialchars($admin['role'], ENT_QUOTES, 'UTF-8'); ?></div>
-                    </div>
-                    <div class="admin-avatar">
-                        <?php echo strtoupper(substr($admin['username'], 0, 1)); ?>
-                    </div>
-                    <a href="<?php echo url('logout.php'); ?>" class="btn btn-secondary btn-sm">Logout</a>
-                </div>
-            </header>
-            
+<?php require_once '../includes/header.php'; ?>
+<?php require_once '../includes/sidebar.php'; ?>
+<?php require_once '../includes/topbar.php'; ?>
+
             <!-- Content -->
             <main class="content">
+
                 <!-- Search and Filter Bar -->
-                <div class="filter-bar">
-                    <form method="GET" action="">
+                <div class="filter-bar"><form method="GET" action="" class="w-full"><div class="form-row">
                         <div class="form-group">
                             <label for="search" class="form-label">Search Products</label>
                             <input 
@@ -176,7 +133,7 @@ $page_title = "Products";
                         
                         <div class="form-group">
                             <label for="category" class="form-label">Category</label>
-                            <select id="category" name="category" class="form-control">
+                            <select id="category" name="category" class="form-select">
                                 <option value="">All Categories</option>
                                 <?php foreach ($categories as $category): ?>
                                 <option value="<?php echo $category['id']; ?>" <?php echo $category_filter == $category['id'] ? 'selected' : ''; ?>>
@@ -188,7 +145,7 @@ $page_title = "Products";
                         
                         <div class="form-group">
                             <label for="status" class="form-label">Status</label>
-                            <select id="status" name="status" class="form-control">
+                            <select id="status" name="status" class="form-select">
                                 <option value="">All Status</option>
                                 <option value="in_stock" <?php echo $status_filter === 'in_stock' ? 'selected' : ''; ?>>In Stock</option>
                                 <option value="low_stock" <?php echo $status_filter === 'low_stock' ? 'selected' : ''; ?>>Low Stock</option>
@@ -199,34 +156,33 @@ $page_title = "Products";
                         
                         <div class="form-group">
                             <label for="location" class="form-label">Location</label>
-                            <input 
-                                type="text" 
-                                id="location" 
-                                name="location" 
-                                class="form-control" 
-                                placeholder="Location..."
-                                value="<?php echo htmlspecialchars($location_filter, ENT_QUOTES, 'UTF-8'); ?>"
-                            >
+                            <select id="location" name="location" class="form-select">
+                                <option value="">All Locations</option>
+                                <?php foreach ($locations as $loc): ?>
+                                <option value="<?php echo htmlspecialchars($loc['name'], ENT_QUOTES, 'UTF-8'); ?>" <?php echo $location_filter == $loc['name'] ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($loc['name'], ENT_QUOTES, 'UTF-8'); ?>
+                                </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                         
                         <div class="form-group">
-                            <button type="submit" class="btn btn-primary">🔍 Search</button>
+                            <button type="submit" class="btn btn-primary"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg> Search</button>
                             <a href="<?php echo url('products/list.php'); ?>" class="btn btn-secondary">Clear</a>
                         </div>
-                    </form>
+                    </div></form>
                 </div>
                 
                 <!-- Results Summary -->
                 <div class="card">
-                    <div class="card-header">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="card-header justify-between">
                             <h3 class="card-title">
                                 Product List 
                                 <span class="badge badge-secondary"><?php echo number_format($total_products); ?> products</span>
                             </h3>
                             <div class="btn-group">
-                                <a href="<?php echo url('products/create.php'); ?>" class="btn btn-success btn-sm">➕ Add Product</a>
-                                <a href="<?php echo url('exports/?type=products'); ?>" class="btn btn-warning btn-sm">📤 Export</a>
+                                <a href="<?php echo url('products/create.php'); ?>" class="btn btn-primary btn-sm"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Add Product</a>
+                                <a href="<?php echo url('exports/?type=products'); ?>" class="btn btn-secondary btn-sm">📤 Export</a>
                             </div>
                         </div>
                     </div>
@@ -238,7 +194,7 @@ $page_title = "Products";
                                     <br><a href="<?php echo url('products/list.php'); ?>" class="btn btn-secondary btn-sm mt-2">View All Products</a>
                                 <?php else: ?>
                                     No products found. 
-                                    <br><a href="<?php echo url('products/create.php'); ?>" class="btn btn-success btn-sm mt-2">Add Your First Product</a>
+                                    <br><a href="<?php echo url('products/create.php'); ?>" class="btn btn-primary btn-sm mt-2">Add Your First Product</a>
                                 <?php endif; ?>
                             </div>
                         <?php else: ?>
@@ -290,7 +246,9 @@ $page_title = "Products";
                                                     <?php echo htmlspecialchars($status_text, ENT_QUOTES, 'UTF-8'); ?>
                                                 </span>
                                             </td>
-                                            <td><?php echo htmlspecialchars($product['location'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                                            <td>
+                                                <?php echo htmlspecialchars($product['loc_names'] ?: 'Unassigned', ENT_QUOTES, 'UTF-8'); ?>
+                                            </td>
                                             <td>
                                                 <small><?php echo date('M j, Y H:i', strtotime($product['last_updated'])); ?></small>
                                             </td>
@@ -345,25 +303,6 @@ $page_title = "Products";
                         <?php endif; ?>
                     </div>
                 </div>
+            
             </main>
-        </div>
-    </div>
-    
-    <script>
-        // Auto-submit search form on enter
-        document.getElementById('search').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                this.form.submit();
-            }
-        });
-        
-        // Quick filter buttons
-        function quickFilter(status) {
-            const url = new URL(window.location);
-            url.searchParams.set('status', status);
-            url.searchParams.set('page', '1');
-            window.location.href = url.toString();
-        }
-    </script>
-</body>
-</html>
+<?php require_once '../includes/footer.php'; ?>

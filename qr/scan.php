@@ -16,283 +16,13 @@ $admin = Auth::getAdminInfo();
 
 $page_title = "QR Scanner";
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?> - Stock Management System</title>
-    <link rel="stylesheet" href="<?php echo url('assets/css/style.css'); ?>">
-    <style>
-        /* QR Scanner Responsive Styles */
-        .scanner-container {
-            text-align: center;
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
+<?php require_once '../includes/header.php'; ?>
+<?php require_once '../includes/sidebar.php'; ?>
+<?php require_once '../includes/topbar.php'; ?>
 
-        .video-container {
-            position: relative;
-            width: 100%;
-            max-width: 500px;
-            margin: 20px auto;
-            background: #000;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-
-        #scanner-video {
-            width: 100%;
-            height: auto;
-            display: block;
-            border-radius: 12px;
-        }
-
-        /* removed legacy overlay/frame to avoid conflicts; using modern styles below */
-
-        .scanner-controls {
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .scanner-controls .btn {
-            margin: 0 10px;
-            padding: 15px 30px;
-            font-size: 18px;
-            border-radius: 8px;
-        }
-
-        /* Modern QR Scanner Frame */
-        .qr-scanner-overlay {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, 0.5);
-        }
-
-        .qr-scanner-frame {
-            width: 280px;
-            height: 280px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border: 2px solid transparent;
-            border-radius: 20px;
-            box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
-            animation: none;
-            box-sizing: border-box;
-        }
-
-        /* Corner indicators (yellow) anchored to inner edges */
-        .corner-tl, .corner-tr, .corner-bl, .corner-br {
-            position: absolute;
-            width: 32px;
-            height: 32px;
-            border: 4px solid #ffd700;
-            box-sizing: border-box;
-        }
-
-        .corner-tl {
-            top: 0;
-            left: 0;
-            border-right: none;
-            border-bottom: none;
-            border-top-left-radius: 20px;
-        }
-
-        .corner-tr {
-            top: 0;
-            right: 0;
-            border-left: none;
-            border-bottom: none;
-            border-top-right-radius: 20px;
-        }
-
-        .corner-bl {
-            bottom: 0;
-            left: 0;
-            border-right: none;
-            border-top: none;
-            border-bottom-left-radius: 20px;
-        }
-
-        .corner-br {
-            bottom: 0;
-            right: 0;
-            border-left: none;
-            border-top: none;
-            border-bottom-right-radius: 20px;
-        }
-
-        /* Center blue guide line */
-        .scan-line {
-            position: absolute;
-            left: 8px;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            height: 2px;
-            background: #1e90ff; /* blue */
-            box-shadow: 0 0 8px rgba(30,144,255,0.8);
-            border-radius: 1px;
-            pointer-events: none;
-        }
-
-        /* scanLine animation removed as the center line is static */
-
-        /* Center indicator removed; using a single blue guide line instead */
-        .qr-scanner-frame::before { display: none; }
-
-        /* centerPulse animation removed */
-
-        .video-container.detected {
-            border: 4px solid #28a745;
-            box-shadow: 0 0 30px #28a745;
-        }
-
-        .scanner-instructions {
-            max-width: 600px;
-            margin: 0 auto;
-            text-align: left;
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .scanner-container {
-                padding: 15px;
-            }
-            
-            .video-container {
-                max-width: 100%;
-                margin: 10px auto;
-            }
-            
-            .qr-scanner-frame {
-                width: 200px;
-                height: 200px;
-            }
-            
-            .scanner-controls .btn {
-                padding: 12px 20px;
-                font-size: 16px;
-                margin: 5px;
-                width: 100%;
-                max-width: 250px;
-                display: block;
-            }
-            
-            .scanner-instructions {
-                padding: 15px;
-                font-size: 14px;
-            }
-            
-            .scanner-instructions ol, 
-            .scanner-instructions ul {
-                padding-left: 20px;
-            }
-        }
-
-        /* Small mobile devices */
-        @media (max-width: 480px) {
-            .scanner-controls .btn {
-                font-size: 14px;
-                padding: 10px 15px;
-            }
-            
-            .qr-scanner-frame {
-                width: 150px;
-                height: 150px;
-            }
-            
-            #scanner-status {
-                font-size: 14px;
-                padding: 15px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="admin-layout">
-        <!-- Modern Sidebar -->
-        <div class="sidebar-overlay" id="sidebar-overlay"></div>
-        <nav class="sidebar" id="sidebar">
-            <div class="sidebar-logo">
-                <h1>SMS</h1>
-                <p>Stock Management</p>
-            </div>
-            <ul class="sidebar-nav">
-                <li>
-                    <a href="<?php echo BASE_URL; ?>">
-                        <span class="nav-icon">📊</span>
-                        <span class="nav-text">Dashboard</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="<?php echo url('products/list.php'); ?>">
-                        <span class="nav-icon">📦</span>
-                        <span class="nav-text">Products</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="<?php echo url('products/create.php'); ?>">
-                        <span class="nav-icon">➕</span>
-                        <span class="nav-text">Add Product</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="<?php echo url('qr/scan.php'); ?>" class="active">
-                        <span class="nav-icon">📱</span>
-                        <span class="nav-text">QR Scanner</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="<?php echo url('logs/stock_logs.php'); ?>">
-                        <span class="nav-icon">📋</span>
-                        <span class="nav-text">Stock Logs</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="<?php echo url('exports/'); ?>">
-                        <span class="nav-icon">📤</span>
-                        <span class="nav-text">Export Data</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-        
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Modern Top Bar -->
-            <header class="top-bar">
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <button class="mobile-menu-toggle" id="mobile-menu-toggle">
-                        <span>☰</span>
-                    </button>
-                    <h1 class="page-title">
-                        <span class="title-icon">📱</span>
-                        <?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?>
-                    </h1>
-                </div>
-                <div class="admin-info">
-                    <div class="admin-welcome">
-                        <div class="admin-name">Welcome, <?php echo htmlspecialchars($admin['username'], ENT_QUOTES, 'UTF-8'); ?></div>
-                        <div class="admin-role"><?php echo htmlspecialchars($admin['role'], ENT_QUOTES, 'UTF-8'); ?></div>
-                    </div>
-                    <div class="admin-avatar">
-                        <?php echo strtoupper(substr($admin['username'], 0, 1)); ?>
-                    </div>
-                    <a href="<?php echo url('logout.php'); ?>" class="btn btn-secondary btn-sm">Logout</a>
-                </div>
-            </header>
-            
             <!-- Content -->
             <main class="content">
+
                 <!-- Modern Scanner Section -->
                 <div class="card">
                     <div class="card-header">
@@ -326,7 +56,7 @@ $page_title = "QR Scanner";
                             
                             <!-- Scanner Controls -->
                             <div class="scanner-controls">
-                                <button id="start-scanner" class="btn btn-success btn-lg">
+                                <button id="start-scanner" class="btn btn-primary btn-lg">
                                     <span>📷</span>
                                     Start Camera Scanner
                                 </button>
@@ -396,7 +126,7 @@ $page_title = "QR Scanner";
                                     
                                     <div class="form-group">
                                         <label for="new-status" class="form-label">Status</label>
-                                        <select id="new-status" name="status" class="form-control">
+                                        <select id="new-status" name="status" class="form-select">
                                             <option value="in_stock">In Stock</option>
                                             <option value="low_stock">Low Stock</option>
                                             <option value="out_of_stock">Out of Stock</option>
@@ -417,7 +147,7 @@ $page_title = "QR Scanner";
                                 
                                 <div class="form-group">
                                     <div class="btn-group">
-                                        <button type="submit" class="btn btn-success">
+                                        <button type="submit" class="btn btn-primary">
                                             <span>💾</span>
                                             Update Stock
                                         </button>
@@ -623,7 +353,7 @@ $page_title = "QR Scanner";
                     
                     // Debug: Show we're scanning
                     if (Date.now() % 2000 < 100) { // Every 2 seconds for 100ms
-                        this.updateStatusNoScroll('🔍 Scanning for QR codes... Point camera at QR', 'info');
+                        this.updateStatusNoScroll('<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg> Scanning for QR codes... Point camera at QR', 'info');
                     }
                     
                     // Try jsQR if available
@@ -731,7 +461,7 @@ $page_title = "QR Scanner";
                                    style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" 
                                    autocomplete="off">
                             <button id="quick-lookup-btn" style="padding: 8px 16px; background: #2196f3; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                                🔍 Lookup
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg> Lookup
                             </button>
                         </div>
                         <small style="color: #666; display: block; margin-top: 8px;">
@@ -846,7 +576,7 @@ $page_title = "QR Scanner";
             
             lookupProduct(qrValue) {
                 // Don't scroll during lookup
-                this.updateStatusNoScroll('🔍 Looking up product...', 'info');
+                this.updateStatusNoScroll('<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg> Looking up product...', 'info');
                 
                 // Show loading on quick input if it exists
                 const quickInput = document.getElementById('quick-qr-input');
@@ -963,7 +693,7 @@ $page_title = "QR Scanner";
                 const alertClasses = {
                     'info': 'alert-info',
                     'success': 'alert-success',
-                    'error': 'alert-error',
+                    'error': 'alert-danger',
                     'warning': 'alert-warning'
                 };
                 
@@ -979,7 +709,7 @@ $page_title = "QR Scanner";
                 const alertClasses = {
                     'info': 'alert-info',
                     'success': 'alert-success',
-                    'error': 'alert-error',
+                    'error': 'alert-danger',
                     'warning': 'alert-warning'
                 };
                 

@@ -99,87 +99,17 @@ if ($product_id <= 0) {
 
 $page_title = "QR Code Generator";
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?> - Stock Management System</title>
-    <link rel="stylesheet" href="<?php echo url('assets/css/style.css'); ?>">
-    <style>
-        .qr-container {
-            text-align: center;
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .qr-code {
-            max-width: 100%;
-            height: auto;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-        
-        .product-info {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-            text-align: left;
-        }
-        
-        .print-section {
-            margin-top: 20px;
-        }
-        
-        @media print {
-            .no-print { display: none !important; }
-            .qr-container { 
-                box-shadow: none;
-                border: 1px solid #ddd;
-                page-break-inside: avoid;
-            }
-            body { background: white !important; }
-        }
-    </style>
-</head>
-<body>
-    <div class="admin-layout">
-        <!-- Sidebar -->
-        <nav class="sidebar no-print">
-            <div class="sidebar-logo">
-                <h1>SMS</h1>
-            </div>
-            <ul class="sidebar-nav">
-                <li><a href="<?php echo BASE_URL; ?>">📊 Dashboard</a></li>
-                <li><a href="<?php echo url('products/list.php'); ?>" class="active">📦 Products</a></li>
-                <li><a href="<?php echo url('products/create.php'); ?>">➕ Add Product</a></li>
-                <li><a href="<?php echo url('qr/scan.php'); ?>">📱 QR Scanner</a></li>
-                <li><a href="<?php echo url('logs/stock_logs.php'); ?>">📋 Stock Logs</a></li>
-                <li><a href="<?php echo url('exports/'); ?>">📤 Export Data</a></li>
-            </ul>
-        </nav>
-        
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Top Bar -->
-            <header class="top-bar no-print">
-                <h1 class="page-title"><?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?></h1>
-                <div class="admin-info">
-                    <span>Welcome, <?php echo htmlspecialchars($admin['username'], ENT_QUOTES, 'UTF-8'); ?></span>
-                    <a href="<?php echo url('logout.php'); ?>" class="btn btn-secondary btn-sm">Logout</a>
-                </div>
-            </header>
-            
+<?php require_once '../includes/header.php'; ?>
+<?php require_once '../includes/sidebar.php'; ?>
+<?php require_once '../includes/topbar.php'; ?>
+
             <!-- Content -->
             <main class="content">
+
                 <?php if ($error_message): ?>
                     <div class="card">
                         <div class="card-body">
-                            <div class="alert alert-error">
+                            <div class="alert alert-danger">
                                 <?php echo htmlspecialchars($error_message, ENT_QUOTES, 'UTF-8'); ?>
                             </div>
                             <a href="<?php echo url('products/list.php'); ?>" class="btn btn-secondary">Back to Products</a>
@@ -229,7 +159,7 @@ $page_title = "QR Code Generator";
                         
                         <!-- QR Code Debug Info -->
                         <div style="margin-top: 15px; padding: 15px; background: #e7f3ff; border-radius: 6px; font-size: 12px;">
-                            <strong>🔍 QR Debug Info:</strong><br>
+                            <strong><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg> QR Debug Info:</strong><br>
                             <strong>Value:</strong> <code style="background: #fff; padding: 2px 4px; border-radius: 3px;"><?php echo htmlspecialchars($product['qr_code_value'], ENT_QUOTES, 'UTF-8'); ?></code><br>
                             <strong>Length:</strong> <?php echo strlen($product['qr_code_value']); ?> characters<br>
                             <?php if (isset($product['qr_service'])): ?>
@@ -314,22 +244,6 @@ $page_title = "QR Code Generator";
                         </div>
                     </div>
                 <?php endif; ?>
+            
             </main>
-        </div>
-    </div>
-    
-    <script>
-        // Print functionality
-        function printQR() {
-            window.print();
-        }
-        
-        // Auto-print if requested
-        if (new URLSearchParams(window.location.search).get('print') === '1') {
-            window.onload = function() {
-                setTimeout(printQR, 1000);
-            };
-        }
-    </script>
-</body>
-</html>
+<?php require_once '../includes/footer.php'; ?>

@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $category_id = intval($_POST['category_id'] ?? 0);
         $quantity = max(0, intval($_POST['quantity'] ?? 0));
         $min_stock_level = max(0, intval($_POST['min_stock_level'] ?? 10));
-        $location = trim($_POST['location'] ?? '');
+        $location_id = !empty($_POST['location_id']) ? intval($_POST['location_id']) : null;
         $supplier = trim($_POST['supplier'] ?? '');
         $purchase_date = $_POST['purchase_date'] ?? null;
         $purchase_price = floatval($_POST['purchase_price'] ?? 0);
@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $category_id,
                             $quantity,
                             $min_stock_level,
-                            $location ?: null,
+                            null, // location text field deprecated
                             $supplier ?: null,
                             $purchase_date ?: null,
                             $purchase_price > 0 ? $purchase_price : null,
@@ -103,6 +103,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ]);
                         
                         $product_id = $db->lastInsertId();
+                        
+                        // Insert into new product_locations mapping 
+                        if ($location_id) {
+                            $stmt_loc = $db->prepare("INSERT INTO product_locations (product_id, location_id, quantity, is_primary) VALUES (?, ?, ?, 1)");
+                            $stmt_loc->execute([$product_id, $location_id, $quantity]);
+                        }
                         
                         // Log the creation
                         $log_stmt = $db->prepare("
@@ -153,69 +159,31 @@ try {
     error_log("Failed to load categories: " . $e->getMessage());
 }
 
+// Get locations for dropdown
+try {
+    $db = Database::getInstance()->getConnection();
+    $locations_stmt = $db->query("SELECT id, name, location_code FROM locations WHERE status = 'active' ORDER BY name");
+    $locations = $locations_stmt->fetchAll();
+} catch (Exception $e) {
+    $locations = [];
+}
+
 $page_title = "Add Product";
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?> - Stock Management System</title>
-    <link rel="stylesheet" href="<?php echo url('assets/css/style.css'); ?>">
-</head>
-<body>
-    <div class="admin-layout">
-        <!-- Modern Responsive Sidebar -->
-        <div class="sidebar-overlay" id="sidebar-overlay"></div>
-        <nav class="sidebar" id="sidebar">
-            <div class="sidebar-logo">
-                <h1>SMS</h1>
-                <p>Stock Management</p>
-            </div>
-            <ul class="sidebar-nav">
-                <li><a href="<?php echo BASE_URL; ?>"><span class="nav-icon">📊</span><span class="nav-text">Dashboard</span></a></li>
-                <li><a href="<?php echo url('products/list.php'); ?>"><span class="nav-icon">📦</span><span class="nav-text">Products</span></a></li>
-                <li><a href="<?php echo url('products/create.php'); ?>" class="active"><span class="nav-icon">➕</span><span class="nav-text">Add Product</span></a></li>
-                <li><a href="<?php echo url('qr/scan.php'); ?>"><span class="nav-icon">📱</span><span class="nav-text">QR Scanner</span></a></li>
-                <li><a href="<?php echo url('logs/stock_logs.php'); ?>"><span class="nav-icon">📋</span><span class="nav-text">Stock Logs</span></a></li>
-                <li><a href="<?php echo url('exports/'); ?>"><span class="nav-icon">📤</span><span class="nav-text">Export Data</span></a></li>
-            </ul>
-        </nav>
-        
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Modern Responsive Top Bar -->
-            <header class="top-bar">
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <button class="mobile-menu-toggle" id="mobile-menu-toggle">
-                        <span>☰</span>
-                    </button>
-                    <h1 class="page-title">
-                        <span class="title-icon">➕</span>
-                        <?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?>
-                    </h1>
-                </div>
-                <div class="admin-info">
-                    <div class="admin-welcome">
-                        <div class="admin-name">Welcome, <?php echo htmlspecialchars($admin['username'], ENT_QUOTES, 'UTF-8'); ?></div>
-                        <div class="admin-role"><?php echo htmlspecialchars($admin['role'], ENT_QUOTES, 'UTF-8'); ?></div>
-                    </div>
-                    <div class="admin-avatar">
-                        <?php echo strtoupper(substr($admin['username'], 0, 1)); ?>
-                    </div>
-                    <a href="<?php echo url('logout.php'); ?>" class="btn btn-secondary btn-sm">Logout</a>
-                </div>
-            </header>
-            
+<?php require_once '../includes/header.php'; ?>
+<?php require_once '../includes/sidebar.php'; ?>
+<?php require_once '../includes/topbar.php'; ?>
+
             <!-- Content -->
             <main class="content">
+
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Create New Product</h3>
                     </div>
                     <div class="card-body">
                         <?php if (!empty($error_messages)): ?>
-                            <div class="alert alert-error">
+                            <div class="alert alert-danger">
                                 <ul style="margin: 0; padding-left: 20px;">
                                     <?php foreach ($error_messages as $error): ?>
                                         <li><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></li>
@@ -228,7 +196,7 @@ $page_title = "Add Product";
                             <div class="alert alert-success">
                                 <?php echo htmlspecialchars($success_message, ENT_QUOTES, 'UTF-8'); ?>
                                 <div class="mt-2">
-                                    <a href="<?php echo url('products/create.php'); ?>" class="btn btn-success btn-sm">Add Another Product</a>
+                                    <a href="<?php echo url('products/create.php'); ?>" class="btn btn-primary btn-sm">Add Another Product</a>
                                     <a href="<?php echo url('products/list.php'); ?>" class="btn btn-secondary btn-sm">View All Products</a>
                                 </div>
                             </div>
@@ -271,7 +239,7 @@ $page_title = "Add Product";
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="category_id" class="form-label">Category *</label>
-                                    <select id="category_id" name="category_id" class="form-control" required>
+                                    <select id="category_id" name="category_id" class="form-select" required>
                                         <option value="">Select Category</option>
                                         <?php foreach ($categories as $category): ?>
                                         <option value="<?php echo $category['id']; ?>" <?php echo (($_POST['category_id'] ?? '') == $category['id']) ? 'selected' : ''; ?>>
@@ -311,16 +279,16 @@ $page_title = "Add Product";
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="location" class="form-label">Location</label>
-                                    <input 
-                                        type="text" 
-                                        id="location" 
-                                        name="location" 
-                                        class="form-control" 
-                                        value="<?php echo htmlspecialchars($_POST['location'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-                                        maxlength="100"
-                                        placeholder="e.g., Warehouse A, Shelf 3"
-                                    >
+                                    <label for="location_id" class="form-label">Initial Location</label>
+                                    <select id="location_id" name="location_id" class="form-select">
+                                        <option value="">-- No Location Assigned Yet --</option>
+                                        <?php foreach ($locations as $loc): ?>
+                                        <option value="<?php echo $loc['id']; ?>" <?php echo (($_POST['location_id'] ?? '') == $loc['id']) ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($loc['name'] . ' [' . $loc['location_code'] . ']', ENT_QUOTES, 'UTF-8'); ?>
+                                        </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <small class="text-muted">If quantity > 0, it will be placed here initially.</small>
                                 </div>
                                 
                                 <div class="form-group">
@@ -389,40 +357,12 @@ $page_title = "Add Product";
                             </div>
                             
                             <div class="form-group">
-                                <button type="submit" class="btn btn-success">Create Product</button>
+                                <button type="submit" class="btn btn-primary">Create Product</button>
                                 <a href="<?php echo url('products/list.php'); ?>" class="btn btn-secondary">Cancel</a>
                             </div>
                         </form>
                     </div>
                 </div>
-            </main>
-        </div>
-    </div>
-    
-    <script>
-        // Auto-generate SKU from product name
-        document.getElementById('product_name').addEventListener('input', function() {
-            const productName = this.value;
-            const skuField = document.getElementById('sku');
             
-            if (productName && !skuField.value) {
-                // Generate SKU from product name
-                let sku = productName
-                    .toUpperCase()
-                    .replace(/[^A-Z0-9\s]/g, '')
-                    .replace(/\s+/g, '_')
-                    .substring(0, 20);
-                
-                // Add timestamp for uniqueness
-                const timestamp = Date.now().toString().slice(-6);
-                sku = sku + '_' + timestamp;
-                
-                skuField.value = sku;
-            }
-        });
-        
-        // Focus on product name field
-        document.getElementById('product_name').focus();
-    </script>
-</body>
-</html>
+            </main>
+<?php require_once '../includes/footer.php'; ?>

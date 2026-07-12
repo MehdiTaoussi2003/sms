@@ -95,51 +95,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $page_title = "Delete Product";
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?> - Stock Management System</title>
-    <link rel="stylesheet" href="<?php echo url('assets/css/style.css'); ?>">
-</head>
-<body>
-    <div class="admin-layout">
-        <!-- Sidebar -->
-        <nav class="sidebar">
-            <div class="sidebar-logo">
-                <h1>SMS</h1>
-            </div>
-            <ul class="sidebar-nav">
-                <li><a href="<?php echo BASE_URL; ?>">📊 Dashboard</a></li>
-                <li><a href="<?php echo url('products/list.php'); ?>" class="active">📦 Products</a></li>
-                <li><a href="<?php echo url('products/create.php'); ?>">➕ Add Product</a></li>
-                <li><a href="<?php echo url('qr/scan.php'); ?>">📱 QR Scanner</a></li>
-                <li><a href="<?php echo url('logs/stock_logs.php'); ?>">📋 Stock Logs</a></li>
-                <li><a href="<?php echo url('exports/'); ?>">📤 Export Data</a></li>
-            </ul>
-        </nav>
-        
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Top Bar -->
-            <header class="top-bar">
-                <h1 class="page-title"><?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?></h1>
-                <div class="admin-info">
-                    <span>Welcome, <?php echo htmlspecialchars($admin['username'], ENT_QUOTES, 'UTF-8'); ?></span>
-                    <a href="<?php echo url('logout.php'); ?>" class="btn btn-secondary btn-sm">Logout</a>
-                </div>
-            </header>
-            
+<?php require_once '../includes/header.php'; ?>
+<?php require_once '../includes/sidebar.php'; ?>
+<?php require_once '../includes/topbar.php'; ?>
+
             <!-- Content -->
             <main class="content">
+
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">⚠️ Confirm Product Deletion</h3>
                     </div>
                     <div class="card-body">
                         <?php if ($error_message): ?>
-                            <div class="alert alert-error">
+                            <div class="alert alert-danger">
                                 <?php echo htmlspecialchars($error_message, ENT_QUOTES, 'UTF-8'); ?>
                             </div>
                         <?php endif; ?>
@@ -211,8 +180,6 @@ $page_title = "Delete Product";
                         </form>
                     </div>
                 </div>
+            
             </main>
-        </div>
-    </div>
-</body>
-</html>
+<?php require_once '../includes/footer.php'; ?>

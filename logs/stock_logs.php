@@ -109,63 +109,15 @@ try {
 
 $page_title = "Stock Logs";
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?> - Stock Management System</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
-</head>
-<body>
-    <div class="admin-layout">
-        <!-- Modern Responsive Sidebar -->
-        <div class="sidebar-overlay" id="sidebar-overlay"></div>
-        <nav class="sidebar" id="sidebar">
-            <div class="sidebar-logo">
-                <h1>SMS</h1>
-                <p>Stock Management</p>
-            </div>
-            <ul class="sidebar-nav">
-                <li><a href="/sms/"><span class="nav-icon">📊</span><span class="nav-text">Dashboard</span></a></li>
-                <li><a href="/sms/products/list.php"><span class="nav-icon">📦</span><span class="nav-text">Products</span></a></li>
-                <li><a href="/sms/products/create.php"><span class="nav-icon">➕</span><span class="nav-text">Add Product</span></a></li>
-                <li><a href="/sms/qr/scan.php"><span class="nav-icon">📱</span><span class="nav-text">QR Scanner</span></a></li>
-                <li><a href="/sms/logs/stock_logs.php" class="active"><span class="nav-icon">📋</span><span class="nav-text">Stock Logs</span></a></li>
-                <li><a href="/sms/exports/"><span class="nav-icon">📤</span><span class="nav-text">Export Data</span></a></li>
-            </ul>
-        </nav>
-        
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Modern Responsive Top Bar -->
-            <header class="top-bar">
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <button class="mobile-menu-toggle" id="mobile-menu-toggle">
-                        <span>☰</span>
-                    </button>
-                    <h1 class="page-title">
-                        <span class="title-icon">📋</span>
-                        <?php echo htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8'); ?>
-                    </h1>
-                </div>
-                <div class="admin-info">
-                    <div class="admin-welcome">
-                        <div class="admin-name">Welcome, <?php echo htmlspecialchars($admin['username'], ENT_QUOTES, 'UTF-8'); ?></div>
-                        <div class="admin-role"><?php echo htmlspecialchars($admin['role'], ENT_QUOTES, 'UTF-8'); ?></div>
-                    </div>
-                    <div class="admin-avatar">
-                        <?php echo strtoupper(substr($admin['username'], 0, 1)); ?>
-                    </div>
-                    <a href="/sms/logout.php" class="btn btn-secondary btn-sm">Logout</a>
-                </div>
-            </header>
-            
+<?php require_once '../includes/header.php'; ?>
+<?php require_once '../includes/sidebar.php'; ?>
+<?php require_once '../includes/topbar.php'; ?>
+
             <!-- Content -->
             <main class="content">
+
                 <!-- Filter Bar -->
-                <div class="filter-bar">
-                    <form method="GET" action="">
+                <div class="filter-bar"><form method="GET" action="" class="w-full"><div class="form-row">
                         <div class="form-group">
                             <label for="product" class="form-label">Product</label>
                             <input 
@@ -180,7 +132,7 @@ $page_title = "Stock Logs";
                         
                         <div class="form-group">
                             <label for="admin" class="form-label">Admin</label>
-                            <select id="admin" name="admin" class="form-control">
+                            <select id="admin" name="admin" class="form-select">
                                 <option value="">All Admins</option>
                                 <?php foreach ($admins as $admin_option): ?>
                                 <option value="<?php echo $admin_option['id']; ?>" <?php echo $admin_filter == $admin_option['id'] ? 'selected' : ''; ?>>
@@ -192,7 +144,7 @@ $page_title = "Stock Logs";
                         
                         <div class="form-group">
                             <label for="action" class="form-label">Action</label>
-                            <select id="action" name="action" class="form-control">
+                            <select id="action" name="action" class="form-select">
                                 <option value="">All Actions</option>
                                 <option value="create" <?php echo $action_filter === 'create' ? 'selected' : ''; ?>>Create</option>
                                 <option value="update" <?php echo $action_filter === 'update' ? 'selected' : ''; ?>>Update</option>
@@ -228,22 +180,21 @@ $page_title = "Stock Logs";
                         </div>
                         
                         <div class="form-group">
-                            <button type="submit" class="btn btn-primary">🔍 Filter</button>
+                            <button type="submit" class="btn btn-primary"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg> Filter</button>
                             <a href="/sms/logs/stock_logs.php" class="btn btn-secondary">Clear</a>
                         </div>
-                    </form>
+                    </div></form>
                 </div>
                 
                 <!-- Results -->
                 <div class="card">
-                    <div class="card-header">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="card-header justify-between">
                             <h3 class="card-title">
                                 Stock Activity Log 
                                 <span class="badge badge-secondary"><?php echo number_format($total_logs); ?> entries</span>
                             </h3>
                             <div class="btn-group">
-                                <a href="/sms/exports/?type=logs" class="btn btn-warning btn-sm">📤 Export</a>
+                                <a href="/sms/exports/?type=logs" class="btn btn-secondary btn-sm">📤 Export</a>
                             </div>
                         </div>
                     </div>
@@ -374,18 +325,6 @@ $page_title = "Stock Logs";
                         <?php endif; ?>
                     </div>
                 </div>
+            
             </main>
-        </div>
-    </div>
-    
-    <script src="../assets/js/mobile-menu-universal.js"></script>
-    <script>
-        // Auto-submit search form on enter
-        document.getElementById('product').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                this.form.submit();
-            }
-        });
-    </script>
-</body>
-</html>
+<?php require_once '../includes/footer.php'; ?>
